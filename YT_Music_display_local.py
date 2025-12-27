@@ -143,9 +143,22 @@ class LocalMusicOverlay:
     def init_ytmusic(self):
         """Attempt to initialize YTMusic using local auth files and env credentials."""
         try:
-            browser_file = find_auth_file('browser.json')
             oauth_file = find_auth_file('oauth.json')
+            browser_file = find_auth_file('browser.json')
             authjson_file = find_auth_file('auth.json')
+
+            if oauth_file:
+                client_id = ENV_VALUES.get('Client_ID')
+                client_secret = ENV_VALUES.get('Client_Secret')
+                if client_id and client_secret:
+                    try:
+                        creds = OAuthCredentials(client_id=client_id, client_secret=client_secret)
+                        print(f"creds: {creds}")
+                        self.yt = YTMusic(oauth_file, oauth_credentials=creds)
+                        print(f"✓ Initialized YTMusic using {oauth_file} with OAuth credentials")
+                        return
+                    except Exception:
+                        self.yt = None
 
             if browser_file:
                 try:
@@ -154,18 +167,6 @@ class LocalMusicOverlay:
                     return
                 except Exception:
                     self.yt = None
-
-            if oauth_file:
-                client_id = ENV_VALUES.get('Client_ID')
-                client_secret = ENV_VALUES.get('Client_Secret')
-                if client_id and client_secret:
-                    try:
-                        creds = OAuthCredentials(client_id=client_id, client_secret=client_secret)
-                        self.yt = YTMusic(oauth_file, oauth_credentials=creds)
-                        print(f"✓ Initialized YTMusic using {oauth_file} with OAuth credentials")
-                        return
-                    except Exception:
-                        self.yt = None
 
             if authjson_file:
                 try:
