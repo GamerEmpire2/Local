@@ -1,2 +1,3 @@
 browser.json
-env.env
+.env
+oauth.json
